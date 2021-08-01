@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">TimeTo</string>
+    <string name="button_save">Save</string>
+    <string name="hint_task">e.g. Drinking</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+</resources>
