@@ -1,38 +1,23 @@
 package de.oweissbarth.timeto
 
-import androidx.room.*
-import java.time.OffsetDateTime
+import io.realm.RealmList
+import io.realm.RealmObject
+import io.realm.annotations.PrimaryKey
+import java.time.DateTimeException
+import java.time.Instant
+import java.util.*
 
-@Entity(tableName="task_table")
-data class Task(
-    @PrimaryKey(autoGenerate=true) val id: Int,
-    @ColumnInfo(name="name") val name: String,
-    @ColumnInfo(name="start") val start: OffsetDateTime,
-    @ColumnInfo(name="week") val week: Int,
-    @ColumnInfo(name="day") val day: Int,
-    @ColumnInfo(name="hour") val hour: Int,
-    @ColumnInfo(name="minute") val minute: Int,
-    @ColumnInfo(name="second") val second: Int
-){
-    constructor(name: String): this(0,name, OffsetDateTime.now(), 0,0,0,0,30)
+open class Task(
+    var name: String? = null,
+    var start: Date? = null,
+    var week: Int? = null,
+    var day: Int? = null,
+    var hour: Int? = null,
+    var minute: Int? = null,
+    var second: Int? = null,
+    var actions: RealmList<String> = RealmList<String>(),
+    @PrimaryKey var id: String = UUID.randomUUID().toString()
+): RealmObject() {
+
+    constructor(name: String) : this(name, Date.from(Instant.now()), 0, 0,0,0,0)
 }
-
-
-/*@Entity(tableName="action_table")
-data class Action(
-    @PrimaryKey(autoGenerate=true) val id: Int,
-    @ColumnInfo(name="name") val name: String,
-    @ColumnInfo(name="order") val order: Int
-)
-
-
-data class TaskWithActions(
-    @Embedded
-    val task: Task,
-
-    @Relation(
-        parentColumn = "userId",
-        entityColumn = "userCreatorId"
-    )
-    val actions: List<Action>
-)*/

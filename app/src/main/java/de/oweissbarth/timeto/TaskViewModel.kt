@@ -1,22 +1,54 @@
 package de.oweissbarth.timeto
 
+import android.util.Log
 import androidx.lifecycle.*
+import io.realm.Realm
+import io.realm.kotlin.createObject
+import io.realm.kotlin.where
 import kotlinx.coroutines.launch
 import java.lang.IllegalArgumentException
 
-class TaskViewModel(private val repository: TaskRepository) : ViewModel() {
-    val allTasks: LiveData<List<Task>> = repository.allTasks.asLiveData()
+class TaskViewModel : ViewModel() {
+    private val db: Realm by lazy {
+        Realm.getDefaultInstance()
+    }
 
-    fun insert(task: Task) = viewModelScope.launch {
-        repository.insert(task)
+    val allTasks: LiveRealmResults<Task> = LiveRealmResults<Task>(getResults = {
+           db.where<Task>().findAll()
+
+    }, closeRealm = {
+
+        db?.close()
+    })//db.where<Task>().findAll().asLiveData()
+
+    fun insert(task: Task) {
+        db.executeTransaction {
+            it.insert(task)
+        }
+    }
+
+    fun delete(taskID: String) {
+        db.executeTransaction {
+            Log.d("TaskViewModel", "Deleting task $taskID")
+            it.where(Task::class.java).equalTo("id", taskID).findFirst()?.deleteFromRealm()
+        }
+    }
+
+    fun getById(id: String): Task?{
+       return db.where(Task::class.java).equalTo("id", id).findFirst()
+    }
+
+    override fun onCleared() {
+        db.close()
+        super.onCleared()
     }
 }
 
-class TaskViewModelFactory(private val repository: TaskRepository) : ViewModelProvider.Factory{
+class TaskViewModelFactory : ViewModelProvider.Factory{
     override fun <T : ViewModel?> create(modelClass: Class<T>): T {
         if(modelClass.isAssignableFrom(TaskViewModel::class.java)){
             @Suppress("UNCHECKED_CAST")
-            return TaskViewModel(repository) as T
+            return TaskViewModel() as T
         }
         throw IllegalArgumentException("Unknown view model class")
     }
